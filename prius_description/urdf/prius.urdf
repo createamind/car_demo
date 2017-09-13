@@ -47,10 +47,10 @@
       </geometry>
     </visual>
 
-    <collision name="chassis">
-      <origin xyz="0.0 0.05 0.625" rpy="0 0 0"/>
+    <collision name="chassis_collision">
+      <origin xyz="0.0 0.05 0.5" rpy="0 0 0"/>
       <geometry>
-        <box size="1.7526 2.1 0.95"/>
+        <box size="2.4 4.5 0.75"/>
       </geometry>
     </collision>
 
