@@ -487,6 +487,24 @@
     </plugin>
   </gazebo>
 
+  <gazebo reference="chassis">
+    <!-- contact sensor -->
+    <sensor type="contact" name="chassis_sensor">
+      <plugin name="chassis_plugin" filename="libgazebo_ros_bumper.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>5</updateRate>
+        <bumperTopicName>/chassis_bumper</bumperTopicName>
+        <frameName>chassis</frameName>
+      </plugin>
+      <update_rate>5.0</update_rate>
+      <always_on>1</always_on>
+      <contact>
+        <collision>chassis_collision_collision</collision>
+        <topic>/chassis_bumper</topic>
+      </contact>
+    </sensor>
+  </gazebo>
+
   <gazebo>
     <plugin name="p3d" filename="libgazebo_ros_p3d.so">
       <!-- <robotNamespace>/prius</robotNamespace> -->

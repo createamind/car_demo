@@ -29,6 +29,7 @@ RUN mkdir -p /tmp/workspace/src
 COPY prius_description /tmp/workspace/src/prius_description
 COPY prius_msgs /tmp/workspace/src/prius_msgs
 COPY car_demo /tmp/workspace/src/car_demo
+COPY profile /etc/profile
 RUN /bin/bash -c 'cd /tmp/workspace \
  && source /opt/ros/kinetic/setup.bash \
  && catkin_make'
