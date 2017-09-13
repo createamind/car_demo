@@ -1,14 +1,30 @@
 1. build docker 
+
+```
 ./build_demo.bash
+```
 
-2. start docker
+2. run_demo
+```
 ./run_demo.bash
+```
 
-3. enter a running docker
-sudo docker exec -it car_demo /home/source_.sh
+3. start a stopped docker
 
-4. update model description
+```
+docker start car_demo
+```
+
+4. enter a running docker
+```
+docker exec -it car_demo /home/source_.sh
+```
+5. update model description
+```
 ./update_model.sh
-
-5. rebuild package
+```
+6. rebuild package
+```
 ./update_pkg.sh
+```
+7. test gazebo_ros api
