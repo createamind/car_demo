@@ -14,6 +14,7 @@ do
     sleep 1
 done
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Make sure processes in the container can connect to the x server
 # Necessary so gazebo can create a context for OpenGL rendering (even headless)
@@ -38,6 +39,8 @@ sudo nvidia-docker run -it \
   -v "/tmp/.X11-unix:/tmp/.X11-unix" \
   -v "/etc/localtime:/etc/localtime:ro" \
   -v "/dev/input:/dev/input" \
+  -v "$DIR:/home" \
+  --name "car_demo"\
   --privileged \
-  --rm=true \
+  --rm=false \
   osrf/car_demo
