@@ -26,8 +26,8 @@
 
     <road name="Park">
       <width>5</width>
-      <point>0 10 0.005</point>
-      <point>16 10 0.005</point>
+      <point>0 -300 0.005</point>
+      <point>0 -305 0.005</point>
       <material>
         <script>
           <uri>file://media/materials/scripts/gazebo_road.material</uri>

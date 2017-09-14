@@ -106,7 +106,7 @@ class CarPrius(object):
         # for a complicate request, use basic msg type to construct
         req = SetModelState._request_class()
         req.model_state.model_name = self._name
-        req.model_state.pose.position = Point(3, 12, 0.5)
+        req.model_state.pose.position = Point(0, -290 , 0.5)
         req.model_state.pose.orientation = Quaternion(0, 0, 1, 0)
         req.model_state.twist.linear = Vector3(0, 0, 0)
         req.model_state.twist.angular = Vector3(0, 0, 0)

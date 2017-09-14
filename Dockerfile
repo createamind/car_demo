@@ -30,6 +30,8 @@ COPY prius_description /tmp/workspace/src/prius_description
 COPY prius_msgs /tmp/workspace/src/prius_msgs
 COPY car_demo /tmp/workspace/src/car_demo
 COPY profile /etc/profile
+COPY gazebo_road.material /usr/share/gazebo-8/media/materials/scripts/gazebo_road.material
+COPY park.jpg /usr/share/gazebo-8/media/materials/textures/park.jpg
 RUN /bin/bash -c 'cd /tmp/workspace \
  && source /opt/ros/kinetic/setup.bash \
  && catkin_make'
