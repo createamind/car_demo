@@ -14,6 +14,8 @@ export HISTFILE=${HOME}/.bash_history
 touch ${HISTFILE}
 export HISTFILESIZE=10000
 export HISTSIZE=5000
+cp /home/park_material/gazebo_road.material /usr/share/gazebo-8/media/materials/scripts/gazebo_road.material
+cp /home/park_material/park.jpg /usr/share/gazebo-8/media/materials/textures/park.jpg
 
 source /opt/ros/kinetic/setup.bash && source /tmp/workspace/devel/setup.bash
 exec /bin/bash -i
