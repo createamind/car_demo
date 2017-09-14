@@ -16,6 +16,7 @@ done
 
 DIR=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+CONTAINER_ID=`nvidia-docker container ls|grep car_demo | awk '{print $1'}`
 # Make sure processes in the container can connect to the x server
 # Necessary so gazebo can create a context for OpenGL rendering (even headless)
 XAUTH=/tmp/.docker.xauth
@@ -31,15 +32,24 @@ then
     chmod a+r $XAUTH
 fi
 
-nvidia-docker run -it \
-  -e DISPLAY \
-  -e QT_X11_NO_MITSHM=1 \
-  -e XAUTHORITY=$XAUTH \
-  -v "$XAUTH:$XAUTH" \
-  -v "/tmp/.X11-unix:/tmp/.X11-unix" \
-  -v "/etc/localtime:/etc/localtime:ro" \
-  -v "/dev/input:/dev/input" \
-  -v "$DIR:/home" \
-  --privileged \
-  --rm=false \
-  osrf/car_demo bash /home/.dev_helper/shell.sh
+if [ "${CONTAINER_ID}" == "" ];
+then
+    nvidia-docker run -it \
+      -e DISPLAY \
+      -e QT_X11_NO_MITSHM=1 \
+      -e XAUTHORITY=$XAUTH \
+      -v "$XAUTH:$XAUTH" \
+      -v "/tmp/.X11-unix:/tmp/.X11-unix" \
+      -v "/etc/localtime:/etc/localtime:ro" \
+      -v "/dev/input:/dev/input" \
+      -v "$DIR:/home" \
+      --privileged \
+      --rm=false \
+      osrf/car_demo bash /home/.dev_helper/shell.sh
+else
+    nvidia-docker exec -it \
+        -e DISPLAY \
+        -e QT_X11_NO_MITSHM=1 \
+        -e XAUTHORITY=$XAUTH \
+        ${CONTAINER_ID} bash /home/.dev_helper/shell.sh
+fi

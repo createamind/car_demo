@@ -137,12 +137,10 @@ class CarPrius(object):
         
         _contact_pos = [] 
         ## add for contact 
-        for i in range(QUEUE_MAX_SIZE):
+        for i in range(1): # 5hz
             contact_pos = self._contactInfos.ContactQueue.get()
             print('contact  sensor state is  {}'.format(contact_pos) )
             _contact_pos.append(contact_pos)
-
-        
 
         if self._flagEnd: return
         if self._flagRender:
