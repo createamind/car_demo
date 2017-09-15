@@ -37,22 +37,22 @@ format: numpy.ndarray(shape=(240, 320, 3), dtype=uint8) [front, left, right, bac
 laser 生成的数据为 0.2m到3m(?)距离范围内，水平方向上 点的距离信息，发送频率 30 HZ； msg类型为 sensor_msgs.LaserScan， 经过 laser_geometry 包 可转换成 pointcloud 使用 ，或者转换成矩阵。  
 format: numpy.ndarray(shape=(640, 2),type=float32)
 LaserScan 详细信息
- ranges ：numpy.ndarray(shape=(640,),type=float32)
- intensities ：numpy.ndarray(shape=(640,),type=float32)
+     ranges ：numpy.ndarray(shape=(640,),type=float32)
+     intensities ：numpy.ndarray(shape=(640,),type=float32)
 
 
 
 lidar 生成的数据为0.2m到3m距离范围内，8192个点的坐标，发送频率 30 HZ， 占用带宽 2MB/s； msg类型为 sensor_msgs.PointCloud， 可转换成矩阵使用。  
 format: ：numpy.ndarray(shape=(8192,3), type=float32)
 Pointcloud 详细信息
- points:
-   point ：(x , y, z) float32
+   points:
+     point ：(x , y, z) float32
 
 
 sonar 生成0.2m到5m，直线方向上的障碍物距离，发送频率 5 HZ； msg类型为 sensor_msgs.Rang， 距离为float ，直接使用。  
 format：numpy.ndarray(shape=(1,),type=np.float32) 包含range
 sensor_msgs.Rang详细信息
- range : float32
+   range : float32
 
 
 碰撞传感器，根据ContactsState获取的数据生成碰撞点坐标信息，撞击力，可转换成相对于车辆的位置，估算伤害值，作为reward。
@@ -60,34 +60,34 @@ format：numpy.ndarray(shape=(3,),dtype=np.float32) #多个碰撞点组成一个
 
 ContactsState详细信息
 
-wrenches[]  撞击力和力矩
- wrenches:
-  force :(x , y, z) float64
-  torque :(x , y, z) float64
-contact_positions []:
- contact_position:
-   (x , y, z) float64
-   碰撞点的位置（参考坐标系为map ，需要转换成 车辆 base_link）
+      wrenches[]  撞击力和力矩
+         wrenches:
+            force :(x , y, z) float64
+            torque :(x , y, z) float64
+      contact_positions []:
+         contact_position:
+            (x , y, z) float64
+       碰撞点的位置（参考坐标系为map ，需要转换成 车辆 base_link）
 
-depths [] :
-  depth float64
+      depths [] :
+          depth float64
 穿透深度：评估破坏程度
 
 
 位置：  将GetModelState 返回数据转换成数组
 format：np.array(shape=(13,),dtype=np.float32)  包含pose和twist
 GetModelState 详细信息
-pose 位姿
-  position
-    (x , y, z) float32
-  orientation
-    (x , y, z , w) float32
-twist 速度
-  linear
-    (x , y, z) float32
-  angular
-    (x , y, z) float32
-bool success 执行成功
+    pose 位姿
+      position
+        (x , y, z) float32
+      orientation
+        (x , y, z , w) float32
+    twist 速度
+      linear
+        (x , y, z) float32
+      angular
+        (x , y, z) float32
+    bool success 执行成功
 
 
 数据传输的性能压力并不大，主要是硬件性能的约束。
@@ -130,7 +130,9 @@ ret.shift_gears=gears[0]
 
 - 实际仿真过程运行比较慢，本机cpu占用140%，配置的参数要求仿真器内与外部时间比例为1，实际0.6左右，后续多实例并行需要更强主机。(评估出达到1:1的cpu的最低配置需求)
 
-
+````
+world地图太大，对于当前简单的场景可适当简化，去除不必要的建筑
+````
 
 - 碰撞传感器坐标换算不能自动换算，采用手动计算的方法，可能有问题，后续观察。
 
