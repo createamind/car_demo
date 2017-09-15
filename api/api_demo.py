@@ -188,9 +188,9 @@ class CarPrius(object):
 
     def sampleAction(self):
         ret = Control()
-        ret.throttle = 3
+        ret.throttle = 0.3
         ret.brake = 0.0
-        ret.steer = -0.4
+        ret.steer = 0.2
         # ret.steer = np.random.rand() * 0.5 -0.25
         gears=[Control.NO_COMMAND, Control.NEUTRAL, Control.FORWARD, Control.REVERSE]
         ret.shift_gears=gears[0]
@@ -241,7 +241,7 @@ class CarPrius(object):
 
 if __name__ == '__main__':
     rospy.init_node('prius_api')
-    t = CarPrius(display=True)
+    t = CarPrius(display=False)
     t.reset()
     try:
         while True:

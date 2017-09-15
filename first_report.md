@@ -36,22 +36,29 @@ format: numpy.ndarray(shape=(240, 320, 3), dtype=uint8) [front, left, right, bac
 
 laser 生成的数据为 0.2m到3m(?)距离范围内，水平方向上 点的距离信息，发送频率 30 HZ； msg类型为 sensor_msgs.LaserScan， 经过 laser_geometry 包 可转换成 pointcloud 使用 ，或者转换成矩阵。  
 format: numpy.ndarray(shape=(640, 2),type=float32)
+
 LaserScan 详细信息
+
          ranges ：numpy.ndarray(shape=(640,),type=float32)
+         
          intensities ：numpy.ndarray(shape=(640,),type=float32)
 
 
 
 lidar 生成的数据为0.2m到3m距离范围内，8192个点的坐标，发送频率 30 HZ， 占用带宽 2MB/s； msg类型为 sensor_msgs.PointCloud， 可转换成矩阵使用。  
 format: ：numpy.ndarray(shape=(8192,3), type=float32)
+
 Pointcloud 详细信息
+      
        points:
          point ：(x , y, z) float32
 
 
 sonar 生成0.2m到5m，直线方向上的障碍物距离，发送频率 5 HZ； msg类型为 sensor_msgs.Rang， 距离为float ，直接使用。  
 format：numpy.ndarray(shape=(1,),type=np.float32) 包含range
+
 sensor_msgs.Rang详细信息
+       
        range : float32
 
 
@@ -98,27 +105,26 @@ GetModelState 详细信息
 根据泊车的低速环境，设定的控制信号输出频率为5hz
 
 
-float64 steer
-steering：  
-format：float32  Range -1 to +1, +1 is maximum left turn
+    steering：  
+    format：float32  Range -0.5 to +0.5, +0.5 is maximum left turn
 
-accel:  
-format: float32 Range 0 to 1, 1 is max throttle
+    accel:  
+    format: float32 Range 0 to 1, 1 is max throttle
 
-brake:  
-format: float32 Range 0 to 1, 1 is max brake
+    brake:  
+    format: float32 Range 0 to 1, 1 is max brake
 
-gear: 
-[Control.NO_COMMAND, Control.NEUTRAL, Control.FORWARD, Control.REVERSE]
+    gear: 
+    [Control.NO_COMMAND, Control.NEUTRAL, Control.FORWARD, Control.REVERSE]
 
-example :
-```
-ret = Control()
-ret.throttle = 0.7
-ret.brake = 0.0
-ret.steer = -0.4
-gears=[Control.NO_COMMAND, Control.NEUTRAL, Control.FORWARD, Control.REVERSE]
-ret.shift_gears=gears[0]
+    example :
+    ```
+    ret = Control()
+    ret.throttle = 0.7
+    ret.brake = 0.0
+    ret.steer = -0.4
+    gears=[Control.NO_COMMAND, Control.NEUTRAL, Control.FORWARD, Control.REVERSE]
+    ret.shift_gears=gears[0]
 ```
 
 ### 4.问题
@@ -130,10 +136,11 @@ ret.shift_gears=gears[0]
 ```
 - 实际仿真过程中laser，和lidar 数据生成频率 5HZ左右，后续可采用gpu加速的插件。
 
-- 实际仿真过程运行比较慢，本机cpu占用140%，配置的参数要求仿真器内与外部时间比例为1，实际0.6左右，后续多实例并行需要更强主机。(评估出达到1:1的cpu的最低配置需求)
+- 实际仿真过程运行比较慢，本机cpu占用140%，worl文件中配置的参数要求仿真器内与外部时间比例<real_time_factor>为1，实际0.6左右，后续多实例并行需要更强主机。(评估出达到1:1的cpu的最低配置需求)
 
 ````
 world地图太大，对于当前简单的场景可适当简化，去除不必要的建筑
+world已简化，速度提升不明显。另外发现控制指令频率低的话仿真器real_time_factor,会更低一些，0.4左右。
 ````
 
 - 碰撞传感器坐标换算不能自动换算，采用手动计算的方法，可能有问题，后续观察。
@@ -142,7 +149,6 @@ world地图太大，对于当前简单的场景可适当简化，去除不必要
 ```
 根据时间戳同步多个传感器数据
 http://wiki.ros.org/message_filters#Example_.28Python.29-1
-。
 ```
 
 ### 5.结论
