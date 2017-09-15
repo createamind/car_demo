@@ -70,29 +70,18 @@ class CarPrius(object):
 
         for camera in ['front_camera', 'left_camera', 'right_camera', 'back_camera']:
             self._cameraInfos[camera] = si = CameraInfo(self, camera)
-            si.sub = rospy.Subscriber('prius/{}/image_raw'.format(camera), Image, partial(self.callbackCamera, si))
+            si.sub = rospy.Subscriber('prius/{}/image_raw'.format(camera), Image, partial(self._callbackCamera, si))
 
         self.pub = rospy.Publisher('prius', Control, queue_size=1)
 
         ##add contact sensor
         self._contactInfos = sc = ContactInfo()
-        sc.sub = rospy.Subscriber('/chassis_bumper',ContactsState,partial(self.callbackContact, sc))
+        sc.sub = rospy.Subscriber('/chassis_bumper', ContactsState, partial(self._callbackContact, sc))
 
         ## add tf Transformer
         self._tflistener=tf.TransformListener()
         self._tf=tf.TransformerROS()
         self.tf = TransformListener()
-
-
-        try:
-            rospy.wait_for_service('/gazebo/set_model_state')
-            self._set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-            rospy.wait_for_service('gazebo/get_model_state')
-            self._get_model_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
-
-        except rospy.ServiceException as e:
-            print(e)
-            raise e
 
         self._lastPublishTime = rospy.get_rostime()
         self._lastPublished = None
@@ -110,14 +99,20 @@ class CarPrius(object):
         req.model_state.pose.orientation = Quaternion(0, 0, 1, 0)
         req.model_state.twist.linear = Vector3(0, 0, 0)
         req.model_state.twist.angular = Vector3(0, 0, 0)
-        res = self._set_model_state(req)
-        # print(res)
+
+        try:
+            rospy.wait_for_service('/gazebo/set_model_state')
+            set_model_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+            res = set_model_state(req)
+            # print(res)
+        except rospy.ServiceException as e:
+            print(e)
+            raise e
 
     def _resetWorld(self):
         pass
 
-
-    def _close(self):
+    def close(self):
         self._flagEnd = True
         for k, v in self._cameraInfos.items():
             v.imageQueue.close()
@@ -135,12 +130,7 @@ class CarPrius(object):
             image = np.concatenate(_images, -1)
             images.append(image)
         
-        _contact_pos = [] 
-        ## add for contact 
-        for i in range(1): # 5hz
-            contact_pos = self._contactInfos.ContactQueue.get()
-            print('contact  sensor state is  {}'.format(contact_pos) )
-            _contact_pos.append(contact_pos)
+
 
         if self._flagEnd: return
         if self._flagRender:
@@ -160,15 +150,25 @@ class CarPrius(object):
         # req.model_name=self.model_name
         # resp=get_model_state(req)
 
-        position, orientation, linear_vec, angular_vec = self.get_model_state()
-
+        position, orientation, linear_vec, angular_vec = self._get_model_state()
         model_state = np.concatenate([position, orientation, linear_vec, angular_vec])
-        
 
+        quaternion = [-i for i in orientation]
+
+        v3s = self._contactInfos.ContactQueue.get()
+        _contact_pos = []
+        if v3s:
+            # caculate relative_position
+            relative_position = np.array([v3s.vector.x - position[0], v3s.vector.y - position[1], v3s.vector.z - position[2], 1])
+
+            # caculate rotation_matrix ,aplly rotation to  relative_position
+            # get a 4 dim array [x,y,z,1]
+            r_position = np.dot(relative_position, transformations.quaternion_matrix(quaternion))
+            contact_position = r_position[:4]
+
+            _contact_pos = [contact_position]
         # print('prius is at {}'.format(model_state))
-        return images + [model_state]
-
-
+        return images + [model_state] + _contact_pos
 
     def step(self, action):
         assert(isinstance(action, Control))
@@ -190,10 +190,11 @@ class CarPrius(object):
         ret = Control()
         ret.throttle = 3
         ret.brake = 0.0
-        ret.steer = np.random.rand() * 0.5 -0.25
+        ret.steer = -0.4
+        # ret.steer = np.random.rand() * 0.5 -0.25
         return ret
 
-    def callbackCamera(self, cameraInfo, image):
+    def _callbackCamera(self, cameraInfo, image):
         try:
             assert(image.width == IMG_SIZE[0] and image.height == IMG_SIZE[1])
             cv_image = self._cvBridge.imgmsg_to_cv2(image, "bgr8")
@@ -203,13 +204,12 @@ class CarPrius(object):
             print(e)
 
     ##add contact callback
-    def callbackContact(self,contactInfo, contact):
+    def _callbackContact(self, contactInfo, contact):
         #if there is no collision ,contact states will be empty []
         if  len(contact.states) == 0: 
-            contactInfo.ContactQueue.put('Safe')
+            contactInfo.ContactQueue.put(None)
             return
         
-
         #contact positon in in inertial frame (global frame /map )
         #transform it to target frame "/base_link" as car 
         #show contact msg type : rostopic type /chassis_bumper | rosmsg show
@@ -219,60 +219,27 @@ class CarPrius(object):
         v3s.header=contact.header
         v3s.header.frame_id=contactInfo.src_frame
         v3s.vector=contact.states[0].contact_positions[0]
-        
+        contactInfo.ContactQueue.put(v3s)
 
-        contact_position = self.rigid_transform(v3s)
-        # c_pos = contact_position.
-        contactInfo.ContactQueue.put(contact_position)
-
-        rospy.logdebug('there is  collision at {} '.format(contact_position))
-    
-    def rigid_transform(self,v3s=None):
-        # there is bug with in aoto frame transformation between /map and /base_link
-
-        #so  apply rigid_transform by hand
-        # not so much farmilar with matrx ,but result look like ok 
-
-
-        #get car local position quaternion
-        position, quaternion, linear_vec, angular_vec = self.get_model_state()
-
-        quaternion=[ -i for i in quaternion]
-        #caculate relative_position
-        relative_position = np.array([v3s.vector.x - position[0] , v3s.vector.y - position[1] , v3s.vector.z - position[2] , 1 ])
-        
-        #caculate rotation_matrix ,aplly rotation to  relative_position
-        # get a 4 dim array [x,y,z,1]
-        r_position=np.dot(relative_position, transformations.quaternion_matrix(quaternion))
-        contact_position=r_position[:4]
- 
-        return contact_position
-
-    def get_model_state(self):
+    def _get_model_state(self):
         # move get state expression  into a function
-
-        resp=self._get_model_state(self._name, '')
-        position=[getattr(resp.pose.position, k) for k in ['x','y','z']]
-        orientation = [getattr(resp.pose.orientation, k) for k in ['x', 'y', 'z', 'w']]
-        linear_vec = [getattr(resp.twist.linear, k) for k in ['x', 'y', 'z']]
-        angular_vec = [getattr(resp.twist.angular, k) for k in ['x', 'y', 'z']]
-
-
-        
-        
-        return [position, orientation, linear_vec, angular_vec]
-
-
-
-
-
-
-
+        try:
+            rospy.wait_for_service('gazebo/get_model_state')
+            get_model_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+            resp = get_model_state(self._name, '')
+            position = [getattr(resp.pose.position, k) for k in ['x', 'y', 'z']]
+            orientation = [getattr(resp.pose.orientation, k) for k in ['x', 'y', 'z', 'w']]
+            linear_vec = [getattr(resp.twist.linear, k) for k in ['x', 'y', 'z']]
+            angular_vec = [getattr(resp.twist.angular, k) for k in ['x', 'y', 'z']]
+            return [position, orientation, linear_vec, angular_vec]
+        except rospy.ServiceException as e:
+            print(e)
+            raise e
 
 
 if __name__ == '__main__':
     rospy.init_node('prius_api')
-    t = CarPrius(display=False)
+    t = CarPrius(display=True)
     t.reset()
     try:
         while True:
@@ -282,4 +249,4 @@ if __name__ == '__main__':
                 t.reset()
 
     except KeyboardInterrupt:
-        t._close()
+        t.close()
