@@ -37,22 +37,22 @@ format: numpy.ndarray(shape=(240, 320, 3), dtype=uint8) [front, left, right, bac
 laser 生成的数据为 0.2m到3m(?)距离范围内，水平方向上 点的距离信息，发送频率 30 HZ； msg类型为 sensor_msgs.LaserScan， 经过 laser_geometry 包 可转换成 pointcloud 使用 ，或者转换成矩阵。  
 format: numpy.ndarray(shape=(640, 2),type=float32)
 LaserScan 详细信息
-     ranges ：numpy.ndarray(shape=(640,),type=float32)
-     intensities ：numpy.ndarray(shape=(640,),type=float32)
+         ranges ：numpy.ndarray(shape=(640,),type=float32)
+         intensities ：numpy.ndarray(shape=(640,),type=float32)
 
 
 
 lidar 生成的数据为0.2m到3m距离范围内，8192个点的坐标，发送频率 30 HZ， 占用带宽 2MB/s； msg类型为 sensor_msgs.PointCloud， 可转换成矩阵使用。  
 format: ：numpy.ndarray(shape=(8192,3), type=float32)
 Pointcloud 详细信息
-   points:
-     point ：(x , y, z) float32
+       points:
+         point ：(x , y, z) float32
 
 
 sonar 生成0.2m到5m，直线方向上的障碍物距离，发送频率 5 HZ； msg类型为 sensor_msgs.Rang， 距离为float ，直接使用。  
 format：numpy.ndarray(shape=(1,),type=np.float32) 包含range
 sensor_msgs.Rang详细信息
-   range : float32
+       range : float32
 
 
 碰撞传感器，根据ContactsState获取的数据生成碰撞点坐标信息，撞击力，可转换成相对于车辆的位置，估算伤害值，作为reward。
@@ -77,17 +77,19 @@ ContactsState详细信息
 位置：  将GetModelState 返回数据转换成数组
 format：np.array(shape=(13,),dtype=np.float32)  包含pose和twist
 GetModelState 详细信息
-    pose 位姿
-      position
-        (x , y, z) float32
-      orientation
-        (x , y, z , w) float32
-    twist 速度
-      linear
-        (x , y, z) float32
-      angular
-        (x , y, z) float32
-    bool success 执行成功
+
+        pose 位姿
+            position
+                (x , y, z) float32
+            orientation
+                (x , y, z , w) float32
+        twist 速度
+            linear
+                (x , y, z) float32
+            angular
+                (x , y, z) float32
+
+        bool success 执行成功
 
 
 数据传输的性能压力并不大，主要是硬件性能的约束。
@@ -140,7 +142,8 @@ world地图太大，对于当前简单的场景可适当简化，去除不必要
 ```
 根据时间戳同步多个传感器数据
 http://wiki.ros.org/message_filters#Example_.28Python.29-1
-。```
+。
+```
 
 ### 5.结论
 - 功能
