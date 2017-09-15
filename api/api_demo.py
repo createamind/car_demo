@@ -17,7 +17,7 @@
 import rospy
 from prius_msgs.msg import Control
 from sensor_msgs.msg import Joy, Image
-from std_msgs.msg import Header
+from std_msgs.msg import Header ,UInt8
 from gazebo_msgs.srv import GetModelState, SetModelState
 from geometry_msgs.msg import Point, Quaternion ,Vector3, Vector3Stamped
 import numpy as np
@@ -192,6 +192,8 @@ class CarPrius(object):
         ret.brake = 0.0
         ret.steer = -0.4
         # ret.steer = np.random.rand() * 0.5 -0.25
+        gears=[Control.NO_COMMAND, Control.NEUTRAL, Control.FORWARD, Control.REVERSE]
+        ret.shift_gears=gears[0]
         return ret
 
     def _callbackCamera(self, cameraInfo, image):
