@@ -2,7 +2,7 @@
 
 WORKSPACE_DIR=/tmp/workspace/src
 mkdir -p ${WORKSPACE_DIR}/../backup
-for DIR in api car_demo prius_description prius_msgs;
+for DIR in train car_demo prius_description prius_msgs;
 do
     [ -L ${WORKSPACE_DIR}/${DIR} ] && continue;
     [ -d ${WORKSPACE_DIR}/${DIR} ] && mv ${WORKSPACE_DIR}/${DIR} ${WORKSPACE_DIR}/../backup
