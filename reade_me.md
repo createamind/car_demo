@@ -6,25 +6,15 @@
 
 2. run_demo
 ```
-./run_demo.bash
+./run_develop.bash
 ```
 
-3. start a stopped docker
-
+3. launch gazebo
 ```
-docker start car_demo
+roslaunch car_demo demo.launch
 ```
-
-4. enter a running docker
+4. test rl demo
 ```
-docker exec -it car_demo /home/source_.sh
+python train/trian_ddpg.py
 ```
-5. update model description
-```
-./update_model.sh
-```
-6. rebuild package
-```
-./update_pkg.sh
-```
-7. test gazebo_ros api
+-  todo: 
